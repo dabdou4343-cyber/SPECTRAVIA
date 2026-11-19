@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#17152b"><title>FTIR Analyzer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#10101b;--panel:#1d1b30;--line:#38344f;--accent:#9d83f5;--txt:#f6f3ff;--muted:#b8b2ca}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#19152e,#10101b 60%);color:var(--txt);font:15px system-ui,-apple-system,Arial,sans-serif}
+header{max-width:980px;margin:auto;padding:20px 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:22px;margin:0}.sub{font-size:12px;color:var(--muted);margin-top:4px}
+main{max-width:980px;margin:auto;padding:8px 14px 40px}.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:16px;margin:12px 0}h2{font-size:17px;margin:0 0 10px}
+p{color:var(--muted);font-size:13px;line-height:1.55;margin:6px 0 12px}
+button,select,input{font:inherit;color:var(--txt);background:#292541;border:1px solid #51496d;border-radius:10px;padding:10px}
+button{cursor:pointer}button.primary{background:#6548c5;border-color:#8b73e8}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.row button{flex:0 0 auto}
+label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px}
+input[type=file]{max-width:100%}input[type=number]{width:100%}
+#viewer{position:relative;overflow:auto;background:#fff;border-radius:10px;min-height:80px;text-align:center}
+#pdfCanvas{max-width:100%;height:auto;display:block;margin:auto;touch-action:none}
+#overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.small{font-size:12px;color:var(--muted)}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px;margin-top:12px}
+.result{background:#171627;border:1px solid var(--line);border-radius:12px;padding:12px}
+.result b{font-size:17px}.result div{font-size:12px;color:var(--muted);margin-top:5px}
+.notice{border-left:3px solid #e8bd62;background:#2a261e;color:#f0dfb9;padding:10px;border-radius:8px;font-size:12px;line-height:1.5}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--line);padding:9px 5px;text-align:left}th{color:#cfc5ff}
+#status{font-size:12px;color:#c7b9ff;margin-top:9px;min-height:18px}
+@media(max-width:520px){header{align-items:flex-start}h1{font-size:19px}.card{padding:13px}.row>*{min-width:42%}}
+</style></head>
+<body>
+<header><div><h1>FTIR Analyzer</h1><div class="sub" id="tag">PDF spectrum analysis · Prototype</div></div>
+<select id="lang" aria-label="Language"><option value="EN">English</option><option value="FR">Français</option><option value="AR">العربية</option></select></header>
+<main>
+<section class="card"><h2 id="s1">1. Import PDF</h2><p id="p1">Choose a PDF containing an FTIR spectrum. The PDF is processed locally in your browser.</p>
+<div class="row"><input type="file" id="file" accept="application/pdf,.pdf"><select id="page" disabled><option>Page</option></select></div><div id="status"></div></section>
+<section class="card"><h2 id="s2">2. Select the plot area</h2><p id="p2">After the PDF page appears, drag on the graph to select a tight rectangle around the spectrum trace. Avoid axis labels and captions.</p>
+<div id="viewer"><canvas id="pdfCanvas"></canvas><canvas id="overlay" class="hidden"></canvas></div>
+<div class="row" style="margin-top:10px"><button id="clear" disabled>Clear selection</button><button id="analyze" class="primary" disabled>Analyze selected area</button></div></section>
+<section class="card"><h2 id="s3">3. Calibrate X axis</h2><p id="p3">Enter the wavenumber at the left and right edges of your selected plot. FTIR axes commonly decrease from left to right (for example, 4000 to 400 cm⁻¹).</p>
+<div class="row"><div><label id="leftlab">Left edge (cm⁻¹)</label><input type="number" id="left" value="4000"></div><div><label id="rightlab">Right edge (cm⁻¹)</label><input type="number" id="right" value="400"></div></div>
+<label id="directionlab">Peak orientation</label><select id="orientation"><option value="valley">Downward peaks (Transmittance)</option><option value="peak">Upward peaks (Absorbance)</option></select></section>
+<section class="card"><h2 id="s4">4. Results</h2><p id="p4">The detected positions are estimates from the selected plot image. Review the marked peaks and confirm the functional-group assignments with chemistry references and the full spectrum.</p><div id="results" class="small">No analysis yet.</div><div class="row" style="margin-top:12px"><button id="exportPdf" class="primary hidden" type="button">Export results as PDF</button></div></section>
+<section class="card"><h2 id="s5">Scientific limitations</h2><div class="notice" id="warning">This prototype digitizes a rasterized plot after manual region selection and axis calibration. Grid lines, overlapping bands, low-resolution scans, and colored traces can affect detection. Functional-group ranges overlap; assignments are suggestions, not definitive identification. For validated quantitative analysis, use instrument-exported numeric data.</div></section>
+</main>
+<script>
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+const $=id=>document.getElementById(id);let pdfDoc=null,scale=1,drag=null,rect=null,sourceName='';
+const words={
+EN:{tag:'PDF spectrum analysis · Prototype',s1:'1. Import PDF',p1:'Choose a PDF containing an FTIR spectrum. The PDF is processed locally in your browser.',s2:'2. Select the plot area',p2:'After the PDF page appears, drag on the graph to select a tight rectangle around the spectrum trace. Avoid axis labels and captions.',clear:'Clear selection',analyze:'Analyze selected area',s3:'3. Calibrate X axis',p3:'Enter the wavenumber at the left and right edges of your selected plot. FTIR axes commonly decrease from left to right (for example, 4000 to 400 cm⁻¹).',left:'Left edge (cm⁻¹)',right:'Right edge (cm⁻¹)',orientation:'Peak orientation',valley:'Downward peaks (Transmittance)',peak:'Upward peaks (Absorbance)',s4:'4. Results',p4:'Detected positions are estimates from the selected plot image. Review peaks and confirm assignments using the full spectrum.',s5:'Scientific limitations',warning:'This prototype digitizes a rasterized plot after manual region selection and axis calibration. Grid lines, overlapping bands, low-resolution scans, and colored traces can affect detection. Functional-group ranges overlap; assignments are suggestions, not definitive identification. For validated quantitative analysis, use instrument-exported numeric data.',exportPdf:'Export results as PDF',none:'No analysis yet.',loading:'Loading PDF…',loaded:'PDF loaded. Select the graph area.',need:'Please select the graph area first.',cal:'Check the left and right wavenumber values.',found:'Detected peaks',range:'Approximate range',possible:'Possible assignment',confidence:'screening suggestion',nopeaks:'No clear peaks found. Try a tighter selection or adjust the plot region.'},
+FR:{tag:'Analyse du spectre PDF · Prototype',s1:'1. Importer un PDF',p1:'Choisissez un PDF contenant un spectre FTIR. Le fichier est traité localement dans le navigateur.',s2:'2. Sélectionner la zone du graphique',p2:'Tracez un rectangle serré autour de la courbe. Évitez les axes, les légendes et les titres.',clear:'Effacer la sélection',analyze:'Analyser la zone',s3:'3. Étalonner l’axe X',p3:'Saisissez le nombre d’onde aux bords gauche et droit de la zone. L’axe FTIR décroît souvent de 4000 à 400 cm⁻¹.',left:'Bord gauche (cm⁻¹)',right:'Bord droit (cm⁻¹)',orientation:'Orientation des bandes',valley:'Pics vers le bas (Transmittance)',peak:'Pics vers le haut (Absorbance)',s4:'4. Résultats',p4:'Les positions détectées sont des estimations issues de l’image. Vérifiez les pics et les attributions avec le spectre complet.',s5:'Limites scientifiques',warning:'Ce prototype numérise une image après sélection manuelle de la zone et étalonnage de l’axe. Les lignes de grille, bandes superposées, images de faible résolution et courbes colorées peuvent perturber la détection. Les plages des groupes fonctionnels se chevauchent : les attributions sont indicatives, non définitives. Pour une analyse quantitative validée, utilisez les données numériques exportées par l’instrument.',exportPdf:'Exporter les résultats en PDF',none:'Aucune analyse.',loading:'Chargement du PDF…',loaded:'PDF chargé. Sélectionnez la zone du graphique.',need:'Sélectionnez d’abord la zone du graphique.',cal:'Vérifiez les valeurs de nombre d’onde.',found:'Pics détectés',range:'Plage approximative',possible:'Attribution possible',confidence:'indication préliminaire',nopeaks:'Aucun pic net. Essayez une zone plus serrée.'},
+AR:{tag:'تحليل أطياف PDF · نسخة تجريبية',s1:'1. استيراد ملف PDF',p1:'اختر ملف PDF يحتوي على طيف FTIR. تتم معالجة الملف محلياً داخل المتصفح.',s2:'2. تحديد منطقة الرسم',p2:'ارسم مستطيلاً حول منحنى الطيف فقط، وتجنب أرقام المحاور والعناوين.',clear:'مسح التحديد',analyze:'تحليل المنطقة المحددة',s3:'3. معايرة المحور الأفقي',p3:'أدخل رقم الموجة عند الحافة اليسرى واليمنى للمنطقة. غالباً يتناقص محور FTIR من 4000 إلى 400 cm⁻¹.',left:'الحافة اليسرى (cm⁻¹)',right:'الحافة اليمنى (cm⁻¹)',orientation:'اتجاه القمم',valley:'قمم هابطة (النفاذية)',peak:'قمم صاعدة (الامتصاصية)',s4:'4. النتائج',p4:'المواضع المكتشفة تقديرية من صورة الرسم. راجع القمم وتأكد من التعيينات باستخدام الطيف الكامل.',s5:'الحدود العلمية',warning:'تقوم هذه النسخة برقمنة صورة الرسم بعد تحديد المنطقة ومعايرة المحور يدوياً. قد تؤثر خطوط الشبكة وتداخل الحزم وضعف الدقة والمنحنيات الملونة على الكشف. مجالات المجموعات الوظيفية متداخلة؛ لذلك التعيينات اقتراحات أولية وليست إثباتاً نهائياً. للتحليل الكمي الموثوق استخدم البيانات الرقمية المصدّرة من الجهاز.',exportPdf:'تصدير النتائج بصيغة PDF',none:'لا توجد نتائج بعد.',loading:'جارٍ تحميل PDF…',loaded:'تم تحميل PDF. حدد منطقة الرسم.',need:'حدد منطقة الرسم أولاً.',cal:'تحقق من قيم أرقام الموجات.',found:'القمم المكتشفة',range:'المجال التقريبي',possible:'التعيين المحتمل',confidence:'اقتراح أولي',nopeaks:'لم تُكتشف قمم واضحة. جرّب تحديد منطقة أدق.'}};
+let lang='EN';function tr(k){return words[lang][k]||k}
+function setLang(){lang=$('lang').value;document.documentElement.dir=lang==='AR'?'rtl':'ltr';document.documentElement.lang=lang==='AR'?'ar':lang.toLowerCase();['tag','s1','p1','s2','p2','s3','p3','s4','p4','s5','warning'].forEach(k=>$(k).textContent=tr(k));$('clear').textContent=tr('clear');$('analyze').textContent=tr('analyze');$('leftlab').textContent=tr('left');$('rightlab').textContent=tr('right');$('directionlab').textContent=tr('orientation');$('exportPdf').textContent=tr('exportPdf');$('orientation').options[0].text=tr('valley');$('orientation').options[1].text=tr('peak')}
+$('lang').onchange=setLang;setLang();
+function status(t){$('status').textContent=t}
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!window.pdfjsLib){status('PDF engine unavailable. Connect to the internet and reload.');return}
+ try{status(tr('loading'));const buf=await f.arrayBuffer();pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;sourceName=f.name;$('page').innerHTML='';for(let i=1;i<=pdfDoc.numPages;i++){let o=document.createElement('option');o.value=i;o.textContent=`${i} / ${pdfDoc.numPages}`;$('page').append(o)}$('page').disabled=false;$('page').onchange=renderPage;await renderPage();status(tr('loaded'))}catch(err){status('Could not read this PDF: '+err.message)}};
+async function renderPage(){if(!pdfDoc)return;const pg=await pdfDoc.getPage(+$('page').value||1);const v=pg.getViewport({scale:1.45});const c=$('pdfCanvas');c.width=v.width;c.height=v.height;scale=v.scale;await pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise;const o=$('overlay');o.width=c.width;o.height=c.height;o.classList.remove('hidden');rect=null;drawOverlay();$('clear').disabled=false;$('analyze').disabled=false}
+function pos(e){const b=$('overlay').getBoundingClientRect();return {x:(e.clientX-b.left)*$('overlay').width/b.width,y:(e.clientY-b.top)*$('overlay').height/b.height}}
+function drawOverlay(){const c=$('overlay'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);if(rect){x.strokeStyle='#7c3aed';x.lineWidth=3;x.fillStyle='rgba(124,58,237,.12)';x.fillRect(rect.x,rect.y,rect.w,rect.h);x.strokeRect(rect.x,rect.y,rect.w,rect.h)}}
+$('overlay').addEventListener('pointerdown',e=>{if(!$('pdfCanvas').width)return;$('overlay').setPointerCapture(e.pointerId);const p=pos(e);drag=p;rect={x:p.x,y:p.y,w:0,h:0};drawOverlay()});
+$('overlay').addEventListener('pointermove',e=>{if(!drag)return;const p=pos(e);rect={x:Math.min(drag.x,p.x),y:Math.min(drag.y,p.y),w:Math.abs(p.x-drag.x),h:Math.abs(p.y-drag.y)};drawOverlay()});
+$('overlay').addEventListener('pointerup',()=>{drag=null;if(rect&&(rect.w<20||rect.h<15))rect=null;drawOverlay()});
+$('clear').onclick=()=>{rect=null;drawOverlay();$('results').textContent=tr('none');$('exportPdf').classList.add('hidden')};
+const groups=[
+ ['O–H',3200,3600,'alcohols, phenols, carboxylic acids (broad band often)'],
+ ['N–H',3200,3500,'amines and amides'],
+ ['C–H',2850,3100,'alkyl and unsaturated C–H'],
+ ['C≡N',2100,2260,'nitriles'],
+ ['C≡C',2100,2260,'alkynes'],
+ ['C=O',1650,1800,'aldehydes, ketones, esters, acids, amides'],
+ ['C=C',1600,1680,'alkenes and aromatic rings'],
+ ['C–O',1000,1300,'alcohols, ethers, esters'],
+ ['NO₂',1300,1570,'nitro compounds']
+];
+function assignments(n){return groups.filter(g=>n>=g[1]&&n<=g[2]).map(g=>g[0]+' — '+g[3])}
+$('analyze').onclick=()=>{
+ if(!rect||rect.w<30||rect.h<15){status(tr('need'));return}
+ const l=+$('left').value,r=+$('right').value;if(!Number.isFinite(l)||!Number.isFinite(r)||l===r){status(tr('cal'));return}
+ const c=$('pdfCanvas'),ctx=c.getContext('2d'),im=ctx.getImageData(Math.round(rect.x),Math.round(rect.y),Math.round(rect.w),Math.round(rect.h)),w=im.width,h=im.height;
+ let ys=new Array(w).fill(null);
+ for(let x=0;x<w;x++){let arr=[];for(let y=0;y<h;y++){let i=(y*w+x)*4,R=im.data[i],G=im.data[i+1],B=im.data[i+2],max=Math.max(R,G,B),min=Math.min(R,G,B),sat=max-min; if(max<125 || (sat>65&&max<245))arr.push(y)} if(arr.length){arr.sort((a,b)=>a-b);ys[x]=arr[Math.floor(arr.length/2)]}}
+ // interpolate short gaps and smooth
+ for(let x=0;x<w;x++)if(ys[x]===null){let a=x-1,b=x+1;while(a>=0&&ys[a]===null)a--;while(b<w&&ys[b]===null)b++;if(a>=0&&b<w&&b-a<=12)ys[x]=ys[a]+(ys[b]-ys[a])*(x-a)/(b-a)}
+ const valid=ys.filter(v=>v!==null);if(valid.length<w*.25){$('results').textContent=tr('nopeaks');$('exportPdf').classList.add('hidden');return}
+ const smooth=ys.map((v,i)=>{if(v===null)return null;let vals=[];for(let j=Math.max(0,i-2);j<=Math.min(w-1,i+2);j++)if(ys[j]!==null)vals.push(ys[j]);return vals.reduce((a,b)=>a+b,0)/vals.length});
+ const orientation=$('orientation').value,sign=orientation==='valley'?1:-1, vals=smooth.map(v=>v===null?null:sign*v);
+ let min=Math.min(...vals.filter(v=>v!==null)),max=Math.max(...vals.filter(v=>v!==null)),prom=(max-min)*.13, candidates=[];
+ for(let x=5;x<w-5;x++){if(vals[x]===null)continue;let v=vals[x],is=true;for(let k=1;k<=4;k++)if(vals[x-k]===null||vals[x+k]===null||v<vals[x-k]||v<vals[x+k]){is=false;break}if(is&&v-min>prom)candidates.push({x,v})}
+ let filtered=[];for(const p of candidates){if(!filtered.length||p.x-filtered[filtered.length-1].x>Math.max(8,w*.025))filtered.push(p);else if(p.v>filtered[filtered.length-1].v)filtered[filtered.length-1]=p}
+ const peaks=filtered.map(p=>{let wn=l+(p.x/w)*(r-l);return {x:p.x,wn}}).sort((a,b)=>a.wn-b.wn);
+ if(!peaks.length){$('results').textContent=tr('nopeaks');$('exportPdf').classList.add('hidden');return}
+ let html=`<p><b>${tr('found')}: ${peaks.length}</b> · ${sourceName}</p><table><tr><th>cm⁻¹</th><th>${tr('possible')}</th></tr>`;
+ peaks.forEach(p=>{let a=assignments(p.wn);html+=`<tr><td><b>${p.wn.toFixed(0)}</b></td><td>${a.length?a.join('<br>'):'No direct range match'}</td></tr>`});html+='</table><p class="small">'+tr('confidence')+'</p>';$('results').innerHTML=html;$('exportPdf').classList.remove('hidden');
+};
+
+$('exportPdf').onclick=()=>{
+  const result=$('results').innerHTML;
+  if(!result || result===tr('none')) return;
+  const dir=lang==='AR'?'rtl':'ltr';
+  const labels={
+    EN:{title:'FTIR Analysis Report',date:'Date',file:'Source PDF',axis:'X-axis calibration',orientation:'Peak orientation',note:'Scientific note: Peak positions and functional-group assignments are preliminary suggestions. Confirm them using the complete spectrum and suitable chemistry references.'},
+    FR:{title:'Rapport d’analyse FTIR',date:'Date',file:'Fichier PDF source',axis:'Étalonnage de l’axe X',orientation:'Orientation des bandes',note:'Note scientifique : les positions des pics et les attributions des groupes fonctionnels sont indicatives. Vérifiez-les avec le spectre complet et des références chimiques adaptées.'},
+    AR:{title:'تقرير تحليل FTIR',date:'التاريخ',file:'ملف PDF المصدر',axis:'معايرة المحور الأفقي',orientation:'اتجاه القمم',note:'ملاحظة علمية: مواضع القمم وتعيينات المجموعات الوظيفية اقتراحات أولية وليست تأكيداً نهائياً. يجب مراجعتها باستخدام الطيف الكامل والمراجع الكيميائية المناسبة.'}
+  }[lang];
+  const report=`<!doctype html><html lang="${lang==='AR'?'ar':lang.toLowerCase()}" dir="${dir}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${labels.title}</title><style>
+  body{font:15px system-ui,-apple-system,Arial,sans-serif;color:#17152b;margin:28px;line-height:1.55}
+  h1{font-size:23px;margin:0 0 18px;border-bottom:2px solid #6548c5;padding-bottom:10px}
+  .meta{margin:8px 0 18px;padding:12px;background:#f3f0fb;border-radius:8px}
+  .meta p{margin:4px 0}.results{margin-top:16px}.results p{margin:8px 0}
+  table{border-collapse:collapse;width:100%;margin-top:12px;font-size:13px}
+  td,th{border:1px solid #d8d3e5;padding:9px;text-align:start;vertical-align:top}
+  th{background:#eee9fb}.note{margin-top:22px;padding:12px;border-left:3px solid #d39b32;background:#fff8e8;font-size:12px}
+  @page{size:auto;margin:16mm}
+  @media print{body{margin:0}.no-print{display:none}}
+  </style></head><body>
+  <h1>${labels.title}</h1>
+  <div class="meta">
+  <p><b>${labels.date}:</b> ${new Date().toLocaleString(lang==='AR'?'ar':lang==='FR'?'fr':'en')}</p>
+  <p><b>${labels.file}:</b> ${sourceName||'—'}</p>
+  <p><b>${labels.axis}:</b> ${$('left').value} → ${$('right').value} cm⁻¹</p>
+  <p><b>${labels.orientation}:</b> ${$('orientation').selectedOptions[0].text}</p>
+  </div>
+  <div class="results">${result}</div>
+  <div class="note">${labels.note}</div>
+  <p class="no-print" style="margin-top:22px;color:#665d7b;font-size:12px">${lang==='AR'?'استخدم خيار الطباعة ثم مشاركة أو حفظ في الملفات لاختيار حفظ التقرير كملف PDF.':lang==='FR'?'Utilisez Imprimer, puis Partager ou Enregistrer dans Fichiers pour conserver le rapport en PDF.':'Choose Print, then Share or Save to Files to keep this report as a PDF.'}</p>
+  <script>window.onload=()=>{setTimeout(()=>window.print(),350)};<\/script>
+  </body></html>`;
+  const blob=new Blob([report],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(!win){status(lang==='AR'?'اسمح بفتح نافذة التقرير ثم أعد المحاولة.':lang==='FR'?'Autorisez l’ouverture du rapport puis réessayez.':'Allow the report window to open, then try again.');}
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+};
+
+</script></body></html>
