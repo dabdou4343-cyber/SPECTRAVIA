@@ -1,422 +1,485 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
-<link rel="apple-touch-icon" href="icon.png.PNG">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#11101f">
-<title>SPECTRAVIA — FTIR Analyzer</title>
+<meta name="theme-color" content="#091725">
+<link rel="apple-touch-icon" href="icon.png.PNG">
+<title>SPECTRAVIA | FTIR Scientific Analyzer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
 :root{
-  --bg:#0d0c18;
-  --panel:#171528;
-  --panel2:#201d35;
-  --line:#34304d;
-  --accent:#9b7bff;
-  --accent2:#7452dc;
-  --txt:#f7f5ff;
-  --muted:#aaa4c2;
-  --success:#75d6b0;
-  --warning:#e8bd62;
-  --shadow:0 12px 35px rgba(0,0,0,.25);
+--bg:#091725;
+--panel:#10283d;
+--panel2:#16364d;
+--line:#28536a;
+--accent:#00d6d6;
+--accent2:#008da7;
+--txt:#effcff;
+--muted:#a6c4d3;
+--success:#66e0bd;
+--warning:#f3c76b;
+--shadow:0 15px 40px rgba(0,0,0,.28);
 }
 
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
 
 body{
-  margin:0;
-  min-height:100vh;
-  background:
-    radial-gradient(ellipse at 15% 0%,rgba(117,78,207,.19),transparent 38%),
-    radial-gradient(ellipse at 90% 35%,rgba(73,57,135,.13),transparent 35%),
-    linear-gradient(145deg,#151226,#0d0c18 65%);
-  color:var(--txt);
-  font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+margin:0;
+min-height:100vh;
+background:
+radial-gradient(ellipse at 10% 0%,rgba(0,214,214,.17),transparent 38%),
+radial-gradient(ellipse at 95% 40%,rgba(0,130,180,.15),transparent 35%),
+linear-gradient(145deg,#10283d,#091725 70%);
+color:var(--txt);
+font:15px system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
 }
 
 header{
-  max-width:1050px;
-  margin:auto;
-  padding:25px 18px 17px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:14px;
+max-width:1100px;
+margin:auto;
+padding:27px 19px 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
 }
 
-header>div{min-width:0}
+.brand{
+display:flex;
+align-items:center;
+gap:13px;
+}
+
+.logo{
+width:45px;
+height:45px;
+border-radius:14px;
+display:grid;
+place-items:center;
+background:linear-gradient(145deg,#00d6d6,#007d9e);
+color:#06202d;
+font-weight:900;
+font-size:22px;
+box-shadow:0 5px 22px rgba(0,214,214,.22);
+}
 
 h1{
-  font-size:25px;
-  letter-spacing:1.5px;
-  font-weight:850;
-  margin:0;
-  background:linear-gradient(100deg,#fff,#bba8ff 70%,#8d75e8);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
+font-size:25px;
+letter-spacing:2px;
+font-weight:900;
+margin:0;
+background:linear-gradient(100deg,#fff,#a3f3ff 65%,#00d6d6);
+-webkit-background-clip:text;
+background-clip:text;
+color:transparent;
 }
 
 .sub{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:5px;
-  letter-spacing:.2px;
+font-size:11px;
+color:var(--muted);
+margin-top:5px;
+letter-spacing:1px;
+}
+
+#lang{
+min-width:120px;
+background:#15364c;
+border-color:#36758b;
+font-weight:650;
 }
 
 main{
-  max-width:1050px;
-  margin:auto;
-  padding:8px 17px 55px;
+max-width:1100px;
+margin:auto;
+padding:10px 18px 60px;
+}
+
+.hero{
+padding:23px 22px;
+border:1px solid rgba(0,214,214,.23);
+border-radius:20px;
+background:linear-gradient(120deg,rgba(0,214,214,.09),rgba(17,51,73,.75));
+margin-bottom:19px;
+}
+
+.hero h2{
+font-size:21px;
+margin:0 0 8px;
+color:#c4f8ff;
+}
+
+.hero p{
+margin:0;
+font-size:13px;
+color:var(--muted);
+line-height:1.8;
+}
+
+.status-pill{
+display:inline-flex;
+align-items:center;
+gap:7px;
+margin-top:13px;
+padding:6px 11px;
+border-radius:30px;
+border:1px solid rgba(102,224,189,.25);
+background:rgba(102,224,189,.08);
+color:#8af0cf;
+font-size:11px;
+}
+
+.dot{
+width:7px;
+height:7px;
+border-radius:50%;
+background:#66e0bd;
 }
 
 .card{
-  position:relative;
-  background:linear-gradient(145deg,rgba(31,28,52,.97),rgba(21,19,37,.97));
-  border:1px solid rgba(157,131,245,.17);
-  border-radius:19px;
-  padding:19px;
-  margin:15px 0;
-  box-shadow:var(--shadow);
-  transition:border-color .2s,transform .2s;
+position:relative;
+background:linear-gradient(145deg,rgba(20,49,72,.97),rgba(13,35,54,.98));
+border:1px solid rgba(91,177,202,.17);
+border-radius:19px;
+padding:20px;
+margin:15px 0;
+box-shadow:var(--shadow);
+transition:border-color .2s;
 }
 
 .card:focus-within{
-  border-color:rgba(157,131,245,.48);
+border-color:rgba(0,214,214,.55);
+}
+
+.card-head{
+display:flex;
+align-items:center;
+gap:11px;
+margin-bottom:11px;
+}
+
+.step{
+width:32px;
+height:32px;
+flex-shrink:0;
+display:grid;
+place-items:center;
+border-radius:10px;
+background:rgba(0,214,214,.12);
+border:1px solid rgba(0,214,214,.25);
+color:#75eff2;
+font-weight:800;
 }
 
 h2{
-  font-size:16px;
-  font-weight:750;
-  margin:0 0 10px;
-  letter-spacing:.15px;
-  color:#e8e1ff;
+font-size:16px;
+font-weight:750;
+margin:0;
+color:#c8f5ff;
 }
 
 p{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.7;
-  margin:6px 0 14px;
+color:var(--muted);
+font-size:13px;
+line-height:1.75;
+margin:6px 0 14px;
 }
 
 button,select,input{
-  font:inherit;
-  color:var(--txt);
-  background:#211e38;
-  border:1px solid #494265;
-  border-radius:11px;
-  padding:11px 13px;
-  outline:none;
-  transition:border-color .2s,background .2s,box-shadow .2s,transform .15s;
+font:inherit;
+color:var(--txt);
+background:#17364e;
+border:1px solid #315b72;
+border-radius:11px;
+padding:11px 13px;
+outline:none;
+transition:.2s;
 }
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(155,123,255,.16);
+button:focus-visible,select:focus-visible,input:focus-visible{
+border-color:var(--accent);
+box-shadow:0 0 0 3px rgba(0,214,214,.15);
 }
 
 button{
-  cursor:pointer;
-  font-weight:650;
-  min-height:43px;
+cursor:pointer;
+font-weight:650;
+min-height:43px;
 }
 
 button:hover:not(:disabled){
-  background:#30294d;
-  border-color:#9279e8;
-  transform:translateY(-1px);
-}
-
-button:active:not(:disabled){
-  transform:scale(.98);
-}
-
-button.primary{
-  background:linear-gradient(110deg,#7957dc,#6041bd);
-  border-color:#9b80f0;
-  box-shadow:0 5px 18px rgba(111,76,204,.2);
-}
-
-button.primary:hover:not(:disabled){
-  background:linear-gradient(110deg,#8c6be9,#7150ce);
+background:#20506a;
+border-color:#00d6d6;
+transform:translateY(-1px);
 }
 
 button:disabled{
-  opacity:.4;
-  cursor:not-allowed;
+opacity:.4;
+cursor:not-allowed;
+}
+
+button.primary{
+background:linear-gradient(110deg,#00b9c5,#007f9e);
+border-color:#43e6e9;
+color:#fff;
+box-shadow:0 5px 18px rgba(0,190,210,.19);
+}
+
+button.primary:hover:not(:disabled){
+background:linear-gradient(110deg,#00d0d0,#009ab5);
 }
 
 select{
-  cursor:pointer;
-  min-width:110px;
+cursor:pointer;
+min-width:110px;
 }
 
 input[type=file]{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  padding:9px;
-  font-size:12px;
-  background:#19172b;
+width:100%;
+max-width:100%;
+min-width:0;
+padding:9px;
+font-size:12px;
+background:#102a40;
 }
 
 input[type=file]::file-selector-button{
-  background:#332b52;
-  color:#e9e1ff;
-  border:1px solid #62548d;
-  border-radius:8px;
-  padding:8px 11px;
-  margin-right:10px;
-  cursor:pointer;
-  font-weight:650;
+background:#16465e;
+color:#e8fcff;
+border:1px solid #31869a;
+border-radius:8px;
+padding:8px 11px;
+margin-right:10px;
+cursor:pointer;
+font-weight:650;
 }
 
 input[type=number]{
-  width:100%;
-  min-width:0;
-  font-variant-numeric:tabular-nums;
+width:100%;
+min-width:0;
+font-variant-numeric:tabular-nums;
 }
 
 .row{
-  display:flex;
-  gap:11px;
-  flex-wrap:wrap;
-  align-items:center;
+display:flex;
+gap:11px;
+flex-wrap:wrap;
+align-items:center;
 }
 
 .row>*{flex:1;min-width:0}
 .row button{flex:0 0 auto}
 
 label{
-  font-size:12px;
-  color:#c4bcdf;
-  display:block;
-  margin:10px 0 7px;
-  font-weight:600;
-}
-
-#lang{
-  min-width:115px;
-  background:#211d38;
-  border-color:#554a79;
-  font-size:13px;
-  font-weight:650;
+font-size:12px;
+color:#b9dce9;
+display:block;
+margin:10px 0 7px;
+font-weight:650;
 }
 
 #viewer{
-  position:relative;
-  overflow:auto;
-  background:#f5f5f5;
-  border:1px solid #51466e;
-  border-radius:13px;
-  min-height:100px;
-  text-align:center;
-  box-shadow:inset 0 0 15px rgba(0,0,0,.08);
-  scrollbar-width:thin;
-  scrollbar-color:#8573b5 #e8e5ef;
+position:relative;
+overflow:auto;
+background:#f5f5f5;
+border:1px solid #00aebd;
+border-radius:13px;
+min-height:100px;
+text-align:center;
 }
 
 #pdfCanvas{
-  max-width:100%;
-  height:auto;
-  display:block;
-  margin:auto;
-  touch-action:none;
+max-width:100%;
+height:auto;
+display:block;
+margin:auto;
+touch-action:none;
 }
 
 #overlay{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  touch-action:none;
-  cursor:crosshair;
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+touch-action:none;
+cursor:crosshair;
 }
 
 .small{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.6;
+font-size:12px;
+color:var(--muted);
+line-height:1.6;
 }
 
 .hidden{display:none!important}
 
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-  gap:11px;
-  margin-top:14px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+gap:11px;
+margin-top:14px;
 }
 
 .result{
-  background:linear-gradient(145deg,#201d36,#19172a);
-  border:1px solid #403958;
-  border-radius:13px;
-  padding:14px;
+background:linear-gradient(145deg,#193e57,#122d44);
+border:1px solid #315c72;
+border-radius:13px;
+padding:14px;
 }
 
 .result b{
-  font-size:17px;
-  color:#d9cbff;
+font-size:17px;
+color:#8beeff;
 }
 
 .result div{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:6px;
-  line-height:1.5;
+font-size:12px;
+color:var(--muted);
+margin-top:6px;
+line-height:1.5;
 }
 
 .notice{
-  border:1px solid rgba(232,189,98,.2);
-  border-left:3px solid var(--warning);
-  background:rgba(83,65,29,.19);
-  color:#e8d9b7;
-  padding:13px 14px;
-  border-radius:10px;
-  font-size:12px;
-  line-height:1.75;
+border:1px solid rgba(243,199,107,.2);
+border-left:3px solid var(--warning);
+background:rgba(83,65,29,.19);
+color:#f0dfb9;
+padding:13px 14px;
+border-radius:10px;
+font-size:12px;
+line-height:1.8;
 }
 
 table{
-  border-collapse:separate;
-  border-spacing:0;
-  width:100%;
-  font-size:13px;
-  overflow:hidden;
-  border-radius:10px;
-  margin-top:12px;
+border-collapse:separate;
+border-spacing:0;
+width:100%;
+font-size:13px;
+overflow:hidden;
+border-radius:10px;
+margin-top:12px;
 }
 
 td,th{
-  border-bottom:1px solid #39344f;
-  padding:11px 9px;
-  text-align:start;
-  vertical-align:top;
+border-bottom:1px solid #294c61;
+padding:11px 9px;
+text-align:start;
+vertical-align:top;
 }
 
 th{
-  color:#d7caff;
-  background:#292440;
-  font-weight:700;
+color:#a9f1ff;
+background:#19445a;
+font-weight:700;
 }
 
 td{
-  color:#e3def2;
-  background:rgba(255,255,255,.018);
+color:#e3f4f8;
+background:rgba(255,255,255,.018);
 }
 
 tr:last-child td{border-bottom:0}
 
 #results{
-  overflow-x:auto;
-  overflow-wrap:anywhere;
+overflow-x:auto;
+overflow-wrap:anywhere;
 }
 
-#results p:first-child{
-  color:#e2d9ff;
-}
+#results p:first-child{color:#d7f7ff}
 
 #status{
-  font-size:12px;
-  color:#c7b9ff;
-  margin-top:11px;
-  min-height:19px;
-  line-height:1.5;
+font-size:12px;
+color:#73e9f2;
+margin-top:11px;
+min-height:19px;
+line-height:1.5;
 }
 
 #status:not(:empty){
-  padding:8px 11px;
-  background:rgba(132,105,218,.09);
-  border-radius:8px;
+padding:9px 11px;
+background:rgba(0,214,214,.09);
+border-radius:8px;
 }
 
 #exportPdf{min-width:190px}
-
 #orientation{width:100%}
+
+footer{
+text-align:center;
+padding:18px;
+color:#789bad;
+font-size:11px;
+}
 
 [dir="rtl"] body{text-align:right}
 [dir="rtl"] .notice{
-  border-left:1px solid rgba(232,189,98,.2);
-  border-right:3px solid var(--warning);
+border-left:1px solid rgba(243,199,107,.2);
+border-right:3px solid var(--warning);
 }
 [dir="rtl"] input[type=file]::file-selector-button{
-  margin-right:0;
-  margin-left:10px;
+margin-right:0;
+margin-left:10px;
 }
 [dir="rtl"] td,[dir="rtl"] th{text-align:right}
 
 @media(max-width:600px){
-  header{
-    padding:20px 14px 13px;
-    align-items:center;
-  }
-
-  h1{font-size:21px}
-
-  .sub{font-size:11px}
-
-  main{padding:7px 11px 35px}
-
-  .card{
-    padding:15px;
-    margin:12px 0;
-    border-radius:16px;
-  }
-
-  h2{font-size:15px}
-
-  .row{gap:9px}
-
-  .row>*{min-width:0}
-
-  .row button{
-    flex:1 1 auto;
-    font-size:12px;
-    padding:10px 8px;
-  }
-
-  #file{flex:1 1 100%}
-
-  #page{flex:1 1 100%}
-
-  #viewer{min-height:90px}
-
-  #exportPdf{width:100%}
-
-  td,th{padding:9px 7px;font-size:12px}
+header{
+padding:20px 13px 14px;
+}
+.logo{
+width:39px;
+height:39px;
+font-size:19px;
+}
+h1{font-size:20px}
+.sub{font-size:9px}
+main{padding:8px 11px 35px}
+.hero{padding:18px 15px}
+.hero h2{font-size:18px}
+.card{padding:15px;margin:12px 0;border-radius:16px}
+h2{font-size:15px}
+.row{gap:9px}
+.row button{
+flex:1 1 auto;
+font-size:12px;
+padding:10px 8px;
+}
+#file,#page{flex:1 1 100%}
+#viewer{min-height:90px}
+#exportPdf{width:100%}
+td,th{padding:9px 7px;font-size:12px}
 }
 
 @media(max-width:370px){
-  header{gap:7px}
-  h1{font-size:18px}
-  #lang{min-width:95px;padding:9px;font-size:12px}
-  .card{padding:12px}
+header{gap:7px}
+h1{font-size:17px}
+#lang{min-width:90px;padding:9px;font-size:12px}
+.card{padding:12px}
 }
 
 @media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{
-    scroll-behavior:auto!important;
-    transition:none!important;
-    animation:none!important;
-  }
+*,*::before,*::after{
+scroll-behavior:auto!important;
+transition:none!important;
+animation:none!important;
+}
 }
 </style>
 </head>
 
 <body>
+
 <header>
+<div class="brand">
+<div class="logo">S</div>
 <div>
 <h1>SPECTRAVIA</h1>
-<div class="sub" id="tag">PDF spectrum analysis · Prototype</div>
+<div class="sub" id="tag">SCIENTIFIC FTIR ANALYSIS</div>
+</div>
 </div>
 <select id="lang" aria-label="Language">
 <option value="EN">English</option>
@@ -426,8 +489,18 @@ tr:last-child td{border-bottom:0}
 </header>
 
 <main>
+
+<section class="hero">
+<h2 id="heroTitle">Advanced FTIR Spectrum Analyzer</h2>
+<p id="heroText">A scientific workspace for spectrum visualization, peak screening and preliminary functional-group analysis.</p>
+<div class="status-pill"><span class="dot"></span><span id="heroStatus">PDF processing in browser</span></div>
+</section>
+
 <section class="card">
-<h2 id="s1">1. Import PDF</h2>
+<div class="card-head">
+<div class="step">01</div>
+<h2 id="s1">Import PDF</h2>
+</div>
 <p id="p1">Choose a PDF containing an FTIR spectrum. The PDF is processed locally in your browser.</p>
 <div class="row">
 <input type="file" id="file" accept="application/pdf,.pdf">
@@ -437,21 +510,27 @@ tr:last-child td{border-bottom:0}
 </section>
 
 <section class="card">
-<h2 id="s2">2. Select the plot area</h2>
-<p id="p2">After the PDF page appears, drag on the graph to select a tight rectangle around the spectrum trace. Avoid axis labels and captions.</p>
+<div class="card-head">
+<div class="step">02</div>
+<h2 id="s2">Select spectrum area</h2>
+</div>
+<p id="p2">Drag on the graph to select a tight rectangle around the spectrum trace. Avoid axis labels and captions.</p>
 <div id="viewer">
 <canvas id="pdfCanvas"></canvas>
 <canvas id="overlay" class="hidden"></canvas>
 </div>
 <div class="row" style="margin-top:12px">
 <button id="clear" disabled>Clear selection</button>
-<button id="analyze" class="primary" disabled>Analyze selected area</button>
+<button id="analyze" class="primary" disabled>Analyze spectrum</button>
 </div>
 </section>
 
 <section class="card">
-<h2 id="s3">3. Calibrate X axis</h2>
-<p id="p3">Enter the wavenumber at the left and right edges of your selected plot. FTIR axes commonly decrease from left to right (for example, 4000 to 400 cm⁻¹).</p>
+<div class="card-head">
+<div class="step">03</div>
+<h2 id="s3">Calibrate X axis</h2>
+</div>
+<p id="p3">Enter the wavenumber at the left and right edges of your selected plot. FTIR axes commonly decrease from left to right.</p>
 <div class="row">
 <div>
 <label id="leftlab">Left edge (cm⁻¹)</label>
@@ -470,120 +549,134 @@ tr:last-child td{border-bottom:0}
 </section>
 
 <section class="card">
-<h2 id="s4">4. Results</h2>
-<p id="p4">The detected positions are estimates from the selected plot image. Review the marked peaks and confirm the functional-group assignments with chemistry references and the full spectrum.</p>
+<div class="card-head">
+<div class="step">04</div>
+<h2 id="s4">Analysis results</h2>
+</div>
+<p id="p4">Detected positions are estimates from the selected plot image. Review peaks and confirm assignments with the full spectrum.</p>
 <div id="results" class="small">No analysis yet.</div>
 <div class="row" style="margin-top:13px">
-<button id="exportPdf" class="primary hidden" type="button">Export results as PDF</button>
+<button id="exportPdf" class="primary hidden" type="button">Export PDF report</button>
 </div>
 </section>
 
 <section class="card">
+<div class="card-head">
+<div class="step">05</div>
 <h2 id="s5">Scientific limitations</h2>
-<div class="notice" id="warning">This prototype digitizes a rasterized plot after manual region selection and axis calibration. Grid lines, overlapping bands, low-resolution scans, and colored traces can affect detection. Functional-group ranges overlap; assignments are suggestions, not definitive identification. For validated quantitative analysis, use instrument-exported numeric data.</div>
+</div>
+<div class="notice" id="warning">This prototype digitizes a rasterized plot after manual region selection and axis calibration. Grid lines, overlapping bands, low-resolution scans and colored traces can affect detection. Functional-group ranges overlap; assignments are suggestions, not definitive identification.</div>
 </section>
+
 </main>
+
+<footer>SPECTRAVIA · FTIR SCIENTIFIC ANALYSIS</footer>
 
 <script>
 if(window.pdfjsLib){
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
 const $=id=>document.getElementById(id);
+
 let pdfDoc=null,scale=1,drag=null,rect=null,sourceName='';
 
 const words={
 EN:{
-tag:'PDF spectrum analysis · Prototype',
-s1:'1. Import PDF',
+tag:'SCIENTIFIC FTIR ANALYSIS',
+heroTitle:'Advanced FTIR Spectrum Analyzer',
+heroText:'A scientific workspace for spectrum visualization, peak screening and preliminary functional-group analysis.',
+heroStatus:'PDF processing in browser',
+s1:'Import PDF',
 p1:'Choose a PDF containing an FTIR spectrum. The PDF is processed locally in your browser.',
-s2:'2. Select the plot area',
-p2:'After the PDF page appears, drag on the graph to select a tight rectangle around the spectrum trace. Avoid axis labels and captions.',
+s2:'Select spectrum area',
+p2:'Drag on the graph to select a tight rectangle around the spectrum trace. Avoid axis labels and captions.',
 clear:'Clear selection',
-analyze:'Analyze selected area',
-s3:'3. Calibrate X axis',
-p3:'Enter the wavenumber at the left and right edges of your selected plot. FTIR axes commonly decrease from left to right (for example, 4000 to 400 cm⁻¹).',
+analyze:'Analyze spectrum',
+s3:'Calibrate X axis',
+p3:'Enter the wavenumber at the left and right edges of your selected plot. FTIR axes commonly decrease from left to right.',
 left:'Left edge (cm⁻¹)',
 right:'Right edge (cm⁻¹)',
 orientation:'Peak orientation',
 valley:'Downward peaks (Transmittance)',
 peak:'Upward peaks (Absorbance)',
-s4:'4. Results',
-p4:'Detected positions are estimates from the selected plot image. Review peaks and confirm assignments using the full spectrum.',
+s4:'Analysis results',
+p4:'Detected positions are estimates from the selected plot image. Review peaks and confirm assignments with the full spectrum.',
 s5:'Scientific limitations',
-warning:'This prototype digitizes a rasterized plot after manual region selection and axis calibration. Grid lines, overlapping bands, low-resolution scans, and colored traces can affect detection. Functional-group ranges overlap; assignments are suggestions, not definitive identification. For validated quantitative analysis, use instrument-exported numeric data.',
-exportPdf:'Export results as PDF',
+warning:'This prototype digitizes a rasterized plot after manual region selection and axis calibration. Grid lines, overlapping bands, low-resolution scans and colored traces can affect detection. Functional-group ranges overlap; assignments are suggestions, not definitive identification. For validated quantitative analysis, use instrument-exported numeric data.',
+exportPdf:'Export PDF report',
 none:'No analysis yet.',
 loading:'Loading PDF…',
 loaded:'PDF loaded. Select the graph area.',
 need:'Please select the graph area first.',
 cal:'Check the left and right wavenumber values.',
 found:'Detected peaks',
-range:'Approximate range',
 possible:'Possible assignment',
-confidence:'screening suggestion',
-nopeaks:'No clear peaks found. Try a tighter selection or adjust the plot region.'
+confidence:'Preliminary screening suggestion',
+nopeaks:'No clear peaks found. Try a tighter selection.'
 },
-
 FR:{
-tag:'Analyse du spectre PDF · Prototype',
-s1:'1. Importer un PDF',
-p1:'Choisissez un PDF contenant un spectre FTIR. Le fichier est traité localement dans le navigateur.',
-s2:'2. Sélectionner la zone du graphique',
-p2:'Tracez un rectangle serré autour de la courbe. Évitez les axes, les légendes et les titres.',
+tag:'ANALYSE SCIENTIFIQUE FTIR',
+heroTitle:'Analyseur avancé de spectres FTIR',
+heroText:'Un espace scientifique pour visualiser les spectres, détecter les pics et proposer des groupes fonctionnels.',
+heroStatus:'Traitement PDF dans le navigateur',
+s1:'Importer un PDF',
+p1:'Choisissez un PDF contenant un spectre FTIR. Le fichier est traité localement dans votre navigateur.',
+s2:'Sélectionner la zone du spectre',
+p2:'Tracez un rectangle autour de la courbe. Évitez les axes et les légendes.',
 clear:'Effacer la sélection',
-analyze:'Analyser la zone',
-s3:'3. Étalonner l’axe X',
-p3:'Saisissez le nombre d’onde aux bords gauche et droit de la zone. L’axe FTIR décroît souvent de 4000 à 400 cm⁻¹.',
+analyze:'Analyser le spectre',
+s3:'Étalonner l’axe X',
+p3:'Saisissez le nombre d’onde aux bords gauche et droit de la zone sélectionnée.',
 left:'Bord gauche (cm⁻¹)',
 right:'Bord droit (cm⁻¹)',
 orientation:'Orientation des bandes',
 valley:'Pics vers le bas (Transmittance)',
 peak:'Pics vers le haut (Absorbance)',
-s4:'4. Résultats',
-p4:'Les positions détectées sont des estimations issues de l’image. Vérifiez les pics et les attributions avec le spectre complet.',
+s4:'Résultats',
+p4:'Les positions détectées sont des estimations issues de l’image. Vérifiez les attributions avec le spectre complet.',
 s5:'Limites scientifiques',
-warning:'Ce prototype numérise une image après sélection manuelle de la zone et étalonnage de l’axe. Les lignes de grille, bandes superposées, images de faible résolution et courbes colorées peuvent perturber la détection. Les plages des groupes fonctionnels se chevauchent : les attributions sont indicatives, non définitives. Pour une analyse quantitative validée, utilisez les données numériques exportées par l’instrument.',
-exportPdf:'Exporter les résultats en PDF',
+warning:'Ce prototype numérise une image après sélection manuelle de la zone et étalonnage de l’axe. Les lignes de grille, bandes superposées et images de faible résolution peuvent perturber la détection. Les attributions sont indicatives, non définitives.',
+exportPdf:'Exporter le rapport PDF',
 none:'Aucune analyse.',
 loading:'Chargement du PDF…',
 loaded:'PDF chargé. Sélectionnez la zone du graphique.',
 need:'Sélectionnez d’abord la zone du graphique.',
 cal:'Vérifiez les valeurs de nombre d’onde.',
 found:'Pics détectés',
-range:'Plage approximative',
 possible:'Attribution possible',
-confidence:'indication préliminaire',
+confidence:'Indication préliminaire',
 nopeaks:'Aucun pic net. Essayez une zone plus serrée.'
 },
-
 AR:{
-tag:'تحليل أطياف PDF · نسخة تجريبية',
-s1:'1. استيراد ملف PDF',
+tag:'التحليل العلمي لأطياف FTIR',
+heroTitle:'محلل أطياف FTIR المتقدم',
+heroText:'مساحة علمية لعرض الأطياف واكتشاف القمم واقتراح المجموعات الوظيفية.',
+heroStatus:'معالجة ملفات PDF داخل المتصفح',
+s1:'استيراد ملف PDF',
 p1:'اختر ملف PDF يحتوي على طيف FTIR. تتم معالجة الملف محلياً داخل المتصفح.',
-s2:'2. تحديد منطقة الرسم',
+s2:'تحديد منطقة الطيف',
 p2:'ارسم مستطيلاً حول منحنى الطيف فقط، وتجنب أرقام المحاور والعناوين.',
 clear:'مسح التحديد',
-analyze:'تحليل المنطقة المحددة',
-s3:'3. معايرة المحور الأفقي',
-p3:'أدخل رقم الموجة عند الحافة اليسرى واليمنى للمنطقة. غالباً يتناقص محور FTIR من 4000 إلى 400 cm⁻¹.',
+analyze:'تحليل الطيف',
+s3:'معايرة المحور الأفقي',
+p3:'أدخل رقم الموجة عند الحافة اليسرى واليمنى للمنطقة المحددة.',
 left:'الحافة اليسرى (cm⁻¹)',
 right:'الحافة اليمنى (cm⁻¹)',
 orientation:'اتجاه القمم',
 valley:'قمم هابطة (النفاذية)',
 peak:'قمم صاعدة (الامتصاصية)',
-s4:'4. النتائج',
-p4:'المواضع المكتشفة تقديرية من صورة الرسم. راجع القمم وتأكد من التعيينات باستخدام الطيف الكامل.',
+s4:'نتائج التحليل',
+p4:'المواضع المكتشفة تقديرية من صورة الرسم. راجع القمم والتعيينات باستخدام الطيف الكامل.',
 s5:'الحدود العلمية',
-warning:'تقوم هذه النسخة برقمنة صورة الرسم بعد تحديد المنطقة ومعايرة المحور يدوياً. قد تؤثر خطوط الشبكة وتداخل الحزم وضعف الدقة والمنحنيات الملونة على الكشف. مجالات المجموعات الوظيفية متداخلة؛ لذلك التعيينات اقتراحات أولية وليست إثباتاً نهائياً. للتحليل الكمي الموثوق استخدم البيانات الرقمية المصدّرة من الجهاز.',
-exportPdf:'تصدير النتائج بصيغة PDF',
+warning:'تقوم هذه النسخة برقمنة صورة الرسم بعد تحديد المنطقة ومعايرة المحور يدوياً. قد تؤثر خطوط الشبكة وتداخل الحزم وضعف الدقة على الكشف. التعيينات اقتراحات أولية وليست إثباتاً نهائياً. للتحليل الكمي الموثوق استخدم البيانات الرقمية المصدّرة من الجهاز.',
+exportPdf:'تصدير تقرير PDF',
 none:'لا توجد نتائج بعد.',
 loading:'جارٍ تحميل PDF…',
 loaded:'تم تحميل PDF. حدد منطقة الرسم.',
 need:'حدد منطقة الرسم أولاً.',
 cal:'تحقق من قيم أرقام الموجات.',
 found:'القمم المكتشفة',
-range:'المجال التقريبي',
 possible:'التعيين المحتمل',
 confidence:'اقتراح أولي',
 nopeaks:'لم تُكتشف قمم واضحة. جرّب تحديد منطقة أدق.'
@@ -601,7 +694,7 @@ lang=$('lang').value;
 document.documentElement.dir=lang==='AR'?'rtl':'ltr';
 document.documentElement.lang=lang==='AR'?'ar':lang.toLowerCase();
 
-['tag','s1','p1','s2','p2','s3','p3','s4','p4','s5','warning'].forEach(k=>{
+['tag','heroTitle','heroText','heroStatus','s1','p1','s2','p2','s3','p3','s4','p4','s5','warning'].forEach(k=>{
 $(k).textContent=tr(k);
 });
 
@@ -699,9 +792,9 @@ const x=c.getContext('2d');
 x.clearRect(0,0,c.width,c.height);
 
 if(rect){
-x.strokeStyle='#7c3aed';
+x.strokeStyle='#00d6d6';
 x.lineWidth=3;
-x.fillStyle='rgba(124,58,237,.12)';
+x.fillStyle='rgba(0,214,214,.12)';
 x.fillRect(rect.x,rect.y,rect.w,rect.h);
 x.strokeRect(rect.x,rect.y,rect.w,rect.h);
 }
@@ -735,9 +828,7 @@ drawOverlay();
 
 $('overlay').addEventListener('pointerup',()=>{
 drag=null;
-
 if(rect&&(rect.w<20||rect.h<15))rect=null;
-
 drawOverlay();
 });
 
@@ -749,7 +840,7 @@ $('exportPdf').classList.add('hidden');
 };
 
 const groups=[
-['O–H',3200,3600,'alcohols, phenols, carboxylic acids (broad band often)'],
+['O–H',3200,3600,'alcohols, phenols, carboxylic acids'],
 ['N–H',3200,3500,'amines and amides'],
 ['C–H',2850,3100,'alkyl and unsaturated C–H'],
 ['C≡N',2100,2260,'nitriles'],
@@ -808,7 +899,6 @@ ys[x]=arr[Math.floor(arr.length/2)];
 }
 }
 
-// interpolate short gaps and smooth
 for(let x=0;x<w;x++){
 if(ys[x]===null){
 let a=x-1,b=x+1;
@@ -832,7 +922,6 @@ return;
 
 const smooth=ys.map((v,i)=>{
 if(v===null)return null;
-
 let vals=[];
 
 for(let j=Math.max(0,i-2);j<=Math.min(w-1,i+2);j++){
@@ -891,7 +980,6 @@ let html=`<p><b>${tr('found')}: ${peaks.length}</b> · ${sourceName}</p><table><
 
 peaks.forEach(p=>{
 let a=assignments(p.wn);
-
 html+=`<tr><td><b>${p.wn.toFixed(0)}</b></td><td>${a.length?a.join('<br>'):'No direct range match'}</td></tr>`;
 });
 
@@ -903,7 +991,6 @@ $('exportPdf').classList.remove('hidden');
 
 $('exportPdf').onclick=()=>{
 const result=$('results').innerHTML;
-
 if(!result||result===tr('none'))return;
 
 const dir=lang==='AR'?'rtl':'ltr';
@@ -923,7 +1010,7 @@ date:'Date',
 file:'Fichier PDF source',
 axis:'Étalonnage de l’axe X',
 orientation:'Orientation des bandes',
-note:'Note scientifique : les positions des pics et les attributions des groupes fonctionnels sont indicatives. Vérifiez-les avec le spectre complet et des références chimiques adaptées.'
+note:'Note scientifique : les positions des pics et les attributions sont indicatives. Vérifiez-les avec le spectre complet et des références chimiques adaptées.'
 },
 AR:{
 title:'تقرير تحليل FTIR',
@@ -931,7 +1018,7 @@ date:'التاريخ',
 file:'ملف PDF المصدر',
 axis:'معايرة المحور الأفقي',
 orientation:'اتجاه القمم',
-note:'ملاحظة علمية: مواضع القمم وتعيينات المجموعات الوظيفية اقتراحات أولية وليست تأكيداً نهائياً. يجب مراجعتها باستخدام الطيف الكامل والمراجع الكيميائية المناسبة.'
+note:'ملاحظة علمية: مواضع القمم وتعيينات المجموعات الوظيفية اقتراحات أولية وليست تأكيداً نهائياً.'
 }
 }[lang];
 
@@ -942,52 +1029,17 @@ const report=`<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${labels.title}</title>
 <style>
-body{
-font:15px system-ui,-apple-system,Arial,sans-serif;
-color:#17152b;
-margin:28px;
-line-height:1.55
-}
-h1{
-font-size:23px;
-margin:0 0 18px;
-border-bottom:2px solid #6548c5;
-padding-bottom:10px
-}
-.meta{
-margin:8px 0 18px;
-padding:12px;
-background:#f3f0fb;
-border-radius:8px
-}
+body{font:15px system-ui,-apple-system,Arial,sans-serif;color:#10283d;margin:28px;line-height:1.55}
+h1{font-size:23px;margin:0 0 18px;border-bottom:2px solid #00aebd;padding-bottom:10px}
+.meta{margin:8px 0 18px;padding:12px;background:#eaf8fb;border-radius:8px}
 .meta p{margin:4px 0}
 .results{margin-top:16px}
-.results p{margin:8px 0}
-table{
-border-collapse:collapse;
-width:100%;
-margin-top:12px;
-font-size:13px
-}
-td,th{
-border:1px solid #d8d3e5;
-padding:9px;
-text-align:start;
-vertical-align:top
-}
-th{background:#eee9fb}
-.note{
-margin-top:22px;
-padding:12px;
-border-left:3px solid #d39b32;
-background:#fff8e8;
-font-size:12px
-}
+table{border-collapse:collapse;width:100%;margin-top:12px;font-size:13px}
+td,th{border:1px solid #cbdde4;padding:9px;text-align:start;vertical-align:top}
+th{background:#e0f4f8}
+.note{margin-top:22px;padding:12px;border-left:3px solid #d39b32;background:#fff8e8;font-size:12px}
 @page{size:auto;margin:16mm}
-@media print{
-body{margin:0}
-.no-print{display:none}
-}
+@media print{body{margin:0}.no-print{display:none}}
 </style>
 </head>
 <body>
@@ -1000,8 +1052,8 @@ body{margin:0}
 </div>
 <div class="results">${result}</div>
 <div class="note">${labels.note}</div>
-<p class="no-print" style="margin-top:22px;color:#665d7b;font-size:12px">
-${lang==='AR'?'استخدم خيار الطباعة ثم مشاركة أو حفظ في الملفات لاختيار حفظ التقرير كملف PDF.':lang==='FR'?'Utilisez Imprimer, puis Partager ou Enregistrer dans Fichiers pour conserver le rapport en PDF.':'Choose Print, then Share or Save to Files to keep this report as a PDF.'}
+<p class="no-print" style="margin-top:22px;color:#667;font-size:12px">
+${lang==='AR'?'استخدم خيار الطباعة ثم مشاركة أو حفظ في الملفات لاختيار حفظ التقرير كملف PDF.':lang==='FR'?'Utilisez Imprimer, puis Partager ou Enregistrer dans Fichiers.':'Choose Print, then Share or Save to Files to keep this report as a PDF.'}
 </p>
 <script>
 window.onload=()=>{setTimeout(()=>window.print(),350)};
@@ -1019,6 +1071,7 @@ status(lang==='AR'?'اسمح بفتح نافذة التقرير ثم أعد ال
 
 setTimeout(()=>URL.revokeObjectURL(url),60000);
 };
+
 </script>
 </body>
 </html>
