@@ -25,13 +25,13 @@ jobs:
 
       - name: Prepare Android project
         run: |
-          mkdir app
-          cp index.html app/
-          cp icon.png.PNG app/
+          mkdir -p app/www
+          cp index.html app/www/
+          cp icon.png.PNG app/www/
           cd app
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init SPECTRAVIA com.spectravia.app --web-dir .
+          npx cap init SPECTRAVIA com.spectravia.app --web-dir www
           npx cap add android
           npx cap sync android
 
