@@ -1,84 +1,163 @@
-
 name: Build SPECTRAVIA Apps
 
 on:
+
   workflow_dispatch:
 
 jobs:
+
   android:
+
     name: Build Android APK
+
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Download project
+
         uses: actions/checkout@v4
 
-      - name: Install Java
+      - name: Install Java 21
+
         uses: actions/setup-java@v4
+
         with:
+
           distribution: temurin
+
           java-version: 21
 
       - name: Install Node
+
         uses: actions/setup-node@v4
+
         with:
+
           node-version: 20
 
       - name: Prepare Android project
+
         run: |
+
           mkdir -p app/www
+
           cp index.html app/www/
+
           cp icon.png.PNG app/www/
+
           cd app
+
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+          npm install @capacitor/core@^7 @capacitor/cli@^7 @capacitor/android@^7
+
           npx cap init SPECTRAVIA com.spectravia.app --web-dir www
+
           npx cap add android
+
           npx cap sync android
 
+          cat >> android/build.gradle <<'EOF'
+
+          allprojects {
+
+              configurations.configureEach {
+
+                  resolutionStrategy.eachDependency { details ->
+
+                      if (details.requested.group == 'org.jetbrains.kotlin' &&
+
+                          details.requested.name.startsWith('kotlin-stdlib')) {
+
+                          details.useVersion '1.8.22'
+
+                      }
+
+                  }
+
+              }
+
+          }
+
+          EOF
+
       - name: Build APK
+
         run: |
+
           cd app/android
+
           chmod +x gradlew
+
           ./gradlew assembleDebug
 
       - name: Upload APK
+
         uses: actions/upload-artifact@v4
+
         with:
+
           name: SPECTRAVIA-Android-APK
+
           path: app/android/app/build/outputs/apk/debug/app-debug.apk
 
   windows:
+
     name: Build Windows App
+
     runs-on: windows-latest
+
     steps:
+
       - name: Download project
+
         uses: actions/checkout@v4
 
       - name: Install Node
+
         uses: actions/setup-node@v4
+
         with:
+
           node-version: 20
 
       - name: Prepare Electron
+
         run: |
+
           npm init -y
+
           npm install electron electron-builder --save-dev
+
           npm pkg set main=main.js
+
           npm pkg set scripts.dist="electron-builder --win portable"
+
           npm pkg set build.appId="com.spectravia.app"
+
           npm pkg set build.win.target=portable
+
           npm pkg set build.files[0]=index.html
+
           npm pkg set build.files[1]=main.js
 
       - name: Create Electron entry
+
         run: |
+
           Set-Content main.js 'const { app, BrowserWindow } = require("electron"); app.whenReady().then(() => { const win = new BrowserWindow({ width: 1200, height: 800 }); win.loadFile("index.html"); });'
 
       - name: Build Windows EXE
+
         run: npm run dist
 
       - name: Upload EXE
+
         uses: actions/upload-artifact@v4
+
         with:
+
           name: SPECTRAVIA-Windows-EXE
+
           path: dist/*.exe
