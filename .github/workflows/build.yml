@@ -1,50 +1,53 @@
+
 name: Build SPECTRAVIA Apps
 
 on:
-
   workflow_dispatch:
 
 jobs:
 
   android:
-
     name: Build Android APK
-
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Download project
-
+      - name: Download latest project
         uses: actions/checkout@v4
 
+      - name: Show project version
+        run: |
+          echo "Building commit:"
+          git rev-parse --short HEAD
+          echo "Website files:"
+          ls -la
+
       - name: Install Java 21
-
         uses: actions/setup-java@v4
-
         with:
-
           distribution: temurin
-
           java-version: 21
 
       - name: Install Node
-
         uses: actions/setup-node@v4
-
         with:
-
           node-version: 20
 
       - name: Prepare Android project
-
         run: |
-
           mkdir -p app/www
 
-          cp index.html app/www/
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='app' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            ./ app/www/
 
-          cp icon.png.PNG app/www/
+          test -s app/www/index.html
+
+          echo "Files copied successfully:"
+          ls -la app/www/
 
           cd app
 
@@ -59,105 +62,114 @@ jobs:
           npx cap sync android
 
           cat >> android/build.gradle <<'EOF'
-
           allprojects {
-
               configurations.configureEach {
-
                   resolutionStrategy.eachDependency { details ->
-
                       if (details.requested.group == 'org.jetbrains.kotlin' &&
-
                           details.requested.name.startsWith('kotlin-stdlib')) {
-
                           details.useVersion '1.8.22'
-
                       }
-
                   }
-
               }
-
           }
-
           EOF
 
       - name: Build APK
-
         run: |
-
           cd app/android
-
           chmod +x gradlew
-
           ./gradlew assembleDebug
 
       - name: Upload APK
-
         uses: actions/upload-artifact@v4
-
         with:
-
           name: SPECTRAVIA-Android-APK
-
           path: app/android/app/build/outputs/apk/debug/app-debug.apk
 
   windows:
-
     name: Build Windows App
-
     runs-on: windows-latest
 
     steps:
-
-      - name: Download project
-
+      - name: Download latest project
         uses: actions/checkout@v4
 
       - name: Install Node
-
         uses: actions/setup-node@v4
-
         with:
-
           node-version: 20
 
-      - name: Prepare Electron
-
+      - name: Show project version
         run: |
+          git rev-parse --short HEAD
+          Get-ChildItem
 
-          npm init -y
+      - name: Prepare Electron
+        run: |
+          @'
+          {
+            "name": "spectravia-desktop",
+            "version": "1.0.0",
+            "main": "main.js",
+            "scripts": {
+              "dist": "electron-builder --win portable"
+            },
+            "build": {
+              "appId": "com.spectravia.app",
+              "win": {
+                "target": "portable"
+              },
+              "files": [
+                "**/*",
+                "!node_modules/**",
+                "!dist/**",
+                "!.git/**",
+                "!.github/**",
+                "!app/**"
+              ]
+            }
+          }
+          '@ | Set-Content -Encoding utf8 package.json
 
-          npm install electron electron-builder --save-dev
-
-          npm pkg set main=main.js
-
-          npm pkg set scripts.dist="electron-builder --win portable"
-
-          npm pkg set build.appId="com.spectravia.app"
-
-          npm pkg set build.win.target=portable
-
-          npm pkg set build.files[0]=index.html
-
-          npm pkg set build.files[1]=main.js
+          npm install --save-dev electron electron-builder
 
       - name: Create Electron entry
-
         run: |
+          @'
+          const { app, BrowserWindow } = require("electron");
 
-          Set-Content main.js 'const { app, BrowserWindow } = require("electron"); app.whenReady().then(() => { const win = new BrowserWindow({ width: 1200, height: 800 }); win.loadFile("index.html"); });'
+          function createWindow() {
+            const win = new BrowserWindow({
+              width: 1200,
+              height: 800,
+              minWidth: 360,
+              minHeight: 600,
+              autoHideMenuBar: true
+            });
+
+            win.loadFile("index.html");
+          }
+
+          app.whenReady().then(createWindow);
+
+          app.on("window-all-closed", () => {
+            if (process.platform !== "darwin") app.quit();
+          });
+          '@ | Set-Content -Encoding utf8 main.js
+
+      - name: Check website files
+        run: |
+          if (!(Test-Path "index.html")) {
+            throw "index.html is missing"
+          }
+
+          Get-ChildItem
 
       - name: Build Windows EXE
-
         run: npm run dist
 
       - name: Upload EXE
-
         uses: actions/upload-artifact@v4
-
         with:
-
           name: SPECTRAVIA-Windows-EXE
-
           path: dist/*.exe
